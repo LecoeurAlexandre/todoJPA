@@ -4,10 +4,7 @@ import org.example.models.Person;
 import org.example.models.Todo;
 import org.example.models.TodoInfos;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -151,6 +148,29 @@ public class IHM {
     }
     public void displayTasksByUser(){
         System.out.println("Afficher les tâches d'un utilisateur");
+        System.out.println("Veuiller saisir l'id de l'utilisateur");
+        Long userId = sc.nextLong();
+        sc.nextLine();
+        EntityManager em = emf.createEntityManager();
+        try {
+            Query query = em.createQuery("SELECT t FROM Todo t WHERE t.person.id = :id");
+            query.setParameter("id",userId);
+            List<Todo> allTodosByUser = query.getResultList();
+            if (allTodosByUser.isEmpty()) {
+                System.out.println("Aucune tâche trouvée.");
+            } else {
+                System.out.println("=== Liste des tâches ===");
+                System.out.println("Liste des tâches de "+allTodosByUser.get(0).getPerson().getName());
+                for (Todo task : allTodosByUser) {
+                    System.out.println(task.getId() + ". " + task.getName() + " (" + (task.isCompleted() ? "Terminée" : "En cours") + ")"+ ". Description : " +task.getTodoInfos().getDescription()+ ". Priorité : " +task.getTodoInfos().getDueDate()+ ". Priorité : " +task.getTodoInfos().getPriority()+ ". Utilisateur : " +task.getPerson().getName());
+                }
+            }
+
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        em.close();
+
     }
     public void deleteUser() {
         System.out.println("Supprimer un utilisateur");
