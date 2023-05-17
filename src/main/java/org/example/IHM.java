@@ -162,7 +162,7 @@ public class IHM {
                 System.out.println("=== Liste des tâches ===");
                 System.out.println("Liste des tâches de "+allTodosByUser.get(0).getPerson().getName());
                 for (Todo task : allTodosByUser) {
-                    System.out.println(task.getId() + ". " + task.getName() + " (" + (task.isCompleted() ? "Terminée" : "En cours") + ")"+ ". Description : " +task.getTodoInfos().getDescription()+ ". Priorité : " +task.getTodoInfos().getDueDate()+ ". Priorité : " +task.getTodoInfos().getPriority()+ ". Utilisateur : " +task.getPerson().getName());
+                    System.out.println(task.getId() + ". " + task.getName() + " (" + (task.isCompleted() ? "Terminée" : "En cours") + ")"+ ". Description : " +task.getTodoInfos().getDescription()+ ". Priorité : " +task.getTodoInfos().getDueDate()+ ". Priorité : " +task.getTodoInfos().getPriority());
                 }
             }
 
@@ -174,5 +174,13 @@ public class IHM {
     }
     public void deleteUser() {
         System.out.println("Supprimer un utilisateur");
+        System.out.println("Quel est l'id de l'utilisateur à supprimer ?");
+        Long idChoice = sc.nextLong();
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+        Person person = em.find(Person.class, idChoice);
+        em.remove(person);
+        em.getTransaction().commit();
+        em.close();
     }
 }
