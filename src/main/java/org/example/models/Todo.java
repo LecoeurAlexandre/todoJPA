@@ -11,8 +11,11 @@ public class Todo {
     private String name;
     private boolean completed = false;
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="todoInfos_id", referencedColumnName = "id")
+    @JoinColumn(name="todoInfos_id", referencedColumnName = "id") //referencedColumnName pas obligatoire, utilisé pour pointer sur une autre colonne que l'id. name renseigne le nom de la colonne de la clé étrangère de la table Todo
     private TodoInfos todoInfos;
+    @ManyToOne
+    @JoinColumn(name="person_id")
+    private Person person;
 
     public Todo() {
     }
@@ -50,6 +53,14 @@ public class Todo {
 
     public void setTodoInfos(TodoInfos todoInfos) {
         this.todoInfos = todoInfos;
+    }
+
+    public Person getPerson() {
+        return person;
+    }
+
+    public void setPerson(Person person) {
+        this.person = person;
     }
 
     @Override

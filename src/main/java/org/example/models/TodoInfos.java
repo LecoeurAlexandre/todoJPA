@@ -11,6 +11,8 @@ public class TodoInfos {
     private String description;
     private LocalDate dueDate;
     private Byte priority;
+    @OneToOne(mappedBy = "todoInfos") // mappedBy pointe sur le nom de la propriété liée de l'entité en relation. Pas obligatoire, seulement pour faire relation multidirectionnelle
+    private Todo todo;
 
     public TodoInfos() {
     }

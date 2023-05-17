@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.models.Person;
 import org.example.models.Todo;
 import org.example.models.TodoInfos;
 
@@ -8,6 +9,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -34,6 +36,15 @@ public class IHM {
                 case "4":
                     deleteTask();
                     break;
+                case "5":
+                    addUser();
+                    break;
+                case "6":
+                    displayTasksByUser();
+                    break;
+                case "7":
+                    deleteUser();
+                    break;
             }
         }while (!choice.equals("0"));
 
@@ -43,6 +54,9 @@ public class IHM {
         System.out.println("2- Afficher toutes les tâches");
         System.out.println("3- Marquer une tâche comme terminée");
         System.out.println("4- Supprimer une tâche");
+        System.out.println("5- Ajouter un nouvel utilisateur");
+        System.out.println("6- Afficher toutes les tâches d'un utilisateur");
+        System.out.println("7- Supprimer un utilisateur et les tâches associées");
         System.out.println("0- Quitter l'application");
     }
     public void addTaskAction() {
@@ -51,19 +65,31 @@ public class IHM {
         String title = sc.nextLine();
         System.out.println("Veuillez saisir la description");
         String description = sc.nextLine();
-        System.out.println("Veuillez choisir la date d'échéance");
+        System.out.println("Veuillez choisir la date d'échéance (format jj.mm.aaaa)");
         String date = sc.nextLine();
-        LocalDate dueDate = LocalDate.parse(date);
-        System.out.println("Veuillez saisir la priorité");
+        LocalDate dueDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        System.out.println("Veuillez saisir la priorité (1 à 3)");
         Byte priority = sc.nextByte();
         sc.nextLine();
-
+        System.out.println("Veuillez renseigner l'id de l'utilisateur");
+        Long userId = sc.nextLong();
+        sc.nextLine();
         EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
-        Todo todo = new Todo(title);
-        todo.setTodoInfos(new TodoInfos(description, dueDate, priority));
-        em.persist(todo);
-        em.getTransaction().commit();
+        EntityTransaction transaction = em.getTransaction();
+        try {
+            transaction.begin();
+            Person person = em.find(Person.class, userId);
+            if(person  != null){
+                Todo todo = new Todo(title);
+                todo.setTodoInfos(new TodoInfos(description, dueDate, priority));
+                todo.setPerson(person);
+                System.out.println(todo);
+                em.persist(todo);
+                transaction.commit();
+            }
+        } catch(Exception e){
+            e.printStackTrace();
+        }
         em.close();
     }
     public void displayTasks(){
@@ -77,12 +103,12 @@ public class IHM {
         } else {
             System.out.println("=== Liste des tâches ===");
             for (Todo task : allTodos) {
-                System.out.println(task.getId() + ". " + task.getName() + " (" + (task.isCompleted() ? "Terminée" : "En cours") + ")");
+                System.out.println(task.getId() + ". " + task.getName() + " (" + (task.isCompleted() ? "Terminée" : "En cours") + ")"+ ". Description : " +task.getTodoInfos().getDescription()+ ". Priorité : " +task.getTodoInfos().getDueDate()+ ". Priorité : " +task.getTodoInfos().getPriority()+ ". Utilisateur : " +task.getPerson().getName());
             }
         }
     }
     public void taskIsDone() {
-        System.out.println("Entrez l'ID de la tâche à supprimer : ");
+        System.out.println("Entrez l'ID de la tâche accomplie : ");
         Long taskId  = sc.nextLong();
         sc.nextLine();
         System.out.println("Marquer une tâche comme terminée");
@@ -109,5 +135,24 @@ public class IHM {
         em.remove(todo);
         em.getTransaction().commit();
         em.close();
+    }
+
+    public void addUser() {
+        System.out.println("Ajouter un utilisateur");
+        System.out.println("Veuillez saisir le nom de l'utilisateur");
+        String name = sc.nextLine();
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+        Person person = new Person(name);
+        em.persist(person);
+        em.getTransaction().commit();
+        em.close();
+
+    }
+    public void displayTasksByUser(){
+        System.out.println("Afficher les tâches d'un utilisateur");
+    }
+    public void deleteUser() {
+        System.out.println("Supprimer un utilisateur");
     }
 }
