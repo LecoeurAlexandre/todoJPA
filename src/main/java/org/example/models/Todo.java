@@ -1,6 +1,8 @@
 package org.example.models;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Todo {
@@ -17,10 +19,18 @@ public class Todo {
     @JoinColumn(name="person_id")
     private Person person;
 
+    @ManyToMany
+    @JoinTable(name="todo_category", joinColumns = @JoinColumn(name= "todo_id"), inverseJoinColumns = @JoinColumn(name= "category_id"))
+    private List<Category> categories = new ArrayList<>();
+
     public Todo() {
     }
     public Todo(String name) {
         this.name = name;
+    }
+    public void addCategory(Category category) {
+        categories.add(category);
+        category.getTodos().add(this);
     }
 
     public Long getId() {
@@ -61,6 +71,14 @@ public class Todo {
 
     public void setPerson(Person person) {
         this.person = person;
+    }
+
+    public List<Category> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<Category> categories) {
+        this.categories = categories;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.models.Category;
 import org.example.models.Person;
 import org.example.models.Todo;
 import org.example.models.TodoInfos;
@@ -42,6 +43,24 @@ public class IHM {
                 case "7":
                     deleteUser();
                     break;
+                case "8":
+                    addCategory();
+                    break;
+                case "9":
+                    deleteCategory();
+                    break;
+                case "10":
+                    displayTodosByCategory();
+                    break;
+                case "11":
+                    addTodoToCategory();
+                    break;
+                case "12":
+                    deleteCategoryFromTodo();
+                    break;
+                case "0" :
+                    System.out.println("Au revoir");
+                    emf.close();
             }
         }while (!choice.equals("0"));
 
@@ -54,6 +73,12 @@ public class IHM {
         System.out.println("5- Ajouter un nouvel utilisateur");
         System.out.println("6- Afficher toutes les tâches d'un utilisateur");
         System.out.println("7- Supprimer un utilisateur et les tâches associées");
+
+        System.out.println("8- Ajouter une catégorie");
+        System.out.println("9- Supprimer une catégorie");
+        System.out.println("10- Afficher les tâches d'une catégorie");
+        System.out.println("11- Ajouter une tâche à une catégorie");
+        System.out.println("12- Supprimer une tâche à une catégorie");
         System.out.println("0- Quitter l'application");
     }
     public void addTaskAction() {
@@ -68,7 +93,7 @@ public class IHM {
         System.out.println("Veuillez saisir la priorité (1 à 3)");
         Byte priority = sc.nextByte();
         sc.nextLine();
-        System.out.println("Veuillez renseigner l'id de l'utilisateur");
+        System.out.println("Veuillez renseigner l'id de l'utilisateur pour cette tâche");
         Long userId = sc.nextLong();
         sc.nextLine();
         EntityManager em = emf.createEntityManager();
@@ -165,7 +190,6 @@ public class IHM {
                     System.out.println(task.getId() + ". " + task.getName() + " (" + (task.isCompleted() ? "Terminée" : "En cours") + ")"+ ". Description : " +task.getTodoInfos().getDescription()+ ". Priorité : " +task.getTodoInfos().getDueDate()+ ". Priorité : " +task.getTodoInfos().getPriority());
                 }
             }
-
         } catch(Exception e){
             e.printStackTrace();
         }
@@ -179,8 +203,62 @@ public class IHM {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
         Person person = em.find(Person.class, idChoice);
-        em.remove(person);
+        if (person != null) {
+            em.remove(person);
+        }
         em.getTransaction().commit();
         em.close();
+    }
+    public void addCategory() {
+        System.out.println("Ajouter une catégorie");
+        System.out.println("Veuillez saisir l'intitulé de la nouvelle catégorie à créer");
+        String tag = sc.nextLine();
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+        Category category = new Category(tag);
+        em.persist(category);
+        em.getTransaction().commit();
+        em.close();
+
+    }
+    public void deleteCategory() {
+        System.out.println("Supprimer une catégorie");
+        System.out.println("Quel est l'id de la catégorie à supprimer ?");
+        Long idChoice = sc.nextLong();
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+        Category category = em.find(Category.class, idChoice);
+        if (category != null) {
+            em.remove(category);
+        }
+        em.getTransaction().commit();
+        em.close();
+    }
+    public void displayTodosByCategory() {
+
+    }
+    public void addTodoToCategory() {
+        System.out.println("Veuillez saisir l'id de la tâche à sélectionner ");
+        Long taskId  = sc.nextLong();
+        sc.nextLine();
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+        Todo todo = em.find(Todo.class, taskId);
+        if (todo != null) {
+            System.out.println("Veuillez saisir l'id de la catégorie à ajouter à la tâche ");
+            Long categoryId  = sc.nextLong();
+            Category category = em.find(Category.class, categoryId);
+            if (category != null) {
+                todo.addCategory(category);
+
+            } else {
+                System.out.println("Aucune catégorie ne correspond à votre saisie");
+            }
+        } else {
+            System.out.println("Aucune tâche ne correspond à votre saisie");
+        }
+    }
+    public void deleteCategoryFromTodo() {
+
     }
 }
